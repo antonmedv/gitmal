@@ -1,0 +1,16 @@
+diff --git a/file.txt b/file.txt
+deleted file mode 100644
+index c9e9e05..0000000
+--- a/file.txt
++++ /dev/null
+@@ -1,10 +0,0 @@
+-one
+-two
+-three
+-four
+-five
+-six
+-seven
+-eight
+-nine
+-ten

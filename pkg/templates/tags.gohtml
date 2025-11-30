@@ -1,0 +1,71 @@
+{{- /*gotype: github.com/antonmedv/gitmal/pkg/templates.TagsParams*/ -}}
+{{ define "head" }}
+    <style>
+      .tags {
+        border: 1px solid var(--c-border);
+        border-radius: var(--border-radius);
+        overflow: hidden;
+      }
+
+      .tag-row {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        height: 44px;
+        padding-inline: 16px;
+        border-bottom: 1px solid var(--c-border);
+        background-color: var(--c-bg-elv);
+      }
+
+      .tag-row:last-child {
+        border-bottom: none;
+      }
+
+      .cell {
+        display: flex;
+        gap: 8px;
+        align-items: center;
+      }
+
+      .tag-title {
+        flex: 1;
+      }
+
+      .tag-row a {
+        color: var(--c-text-1);
+      }
+
+      .tag-row a:hover {
+        color: var(--c-brand-2);
+        text-decoration: none;
+      }
+
+      .date {
+        font-family: var(--font-family-mono), monospace;
+        font-size: 12px;
+        color: var(--c-text-2);
+      }
+
+      .hash a {
+        font-family: var(--font-family-mono), monospace;
+        color: var(--c-text-2);
+      }
+    </style>
+{{ end }}
+
+{{ define "body" }}
+    <h1>Tags</h1>
+    <div class="tags">
+        {{ if .Tags }}
+            {{ range .Tags }}
+                <div class="tag-row">
+                    <div class="cell tag-title"><a href="commit/{{ .CommitHash }}.html">{{ .Name }}</a></div>
+                    <div class="cell date">{{ .Date | FormatDate }}</div>
+                    <div class="cell hash"><a href="commit/{{ .CommitHash }}.html">{{ ShortHash .CommitHash }}</a></div>
+                </div>
+            {{ end }}
+        {{ else }}
+            <div class="tag-row">(no tags)</div>
+        {{ end }}
+    </div>
+{{ end }}

@@ -1,0 +1,16 @@
+diff --git a/file.txt b/file.txt
+new file mode 100644
+index 0000000..c9e9e05
+--- /dev/null
++++ b/file.txt
+@@ -0,0 +1,10 @@
++one
++two
++three
++four
++five
++six
++seven
++eight
++nine
++ten

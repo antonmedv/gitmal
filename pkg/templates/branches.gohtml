@@ -1,0 +1,58 @@
+{{- /*gotype: github.com/antonmedv/gitmal/pkg/templates.BranchesParams*/ -}}
+{{ define "head" }}
+    <style>
+      .branches {
+        border: 1px solid var(--c-border);
+        border-radius: var(--border-radius);
+        overflow: hidden;
+      }
+
+      .branch-row {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        height: 44px;
+        padding-inline: 16px;
+        border-bottom: 1px solid var(--c-border);
+        background-color: var(--c-bg-elv);
+      }
+
+      .branch-row:last-child {
+        border-bottom: none;
+      }
+
+      .branch-row a {
+        color: var(--c-text-1);
+      }
+
+      .branch-row a:hover {
+        color: var(--c-brand-2);
+        text-decoration: none;
+      }
+
+      .badge {
+        font-size: 12px;
+        color: var(--c-text-2);
+        border: 1px solid var(--c-border);
+        padding: 2px 6px;
+        border-radius: 999px;
+      }
+    </style>
+{{ end }}
+
+{{ define "body" }}
+    <h1>Branches</h1>
+    <div class="branches">
+        {{ if .Branches }}
+            {{ range .Branches }}
+                <div class="branch-row">
+                    <a href="{{ .Href }}">{{ .Name }}</a>
+                    {{ if .IsDefault }}<span class="badge">default</span>{{ end }}
+                    <a href="{{ .CommitsHref }}" style="margin-left:auto; font-size:13px; color: var(--c-text-2)">commits →</a>
+                </div>
+            {{ end }}
+        {{ else }}
+            <div class="branch-row">(no branches)</div>
+        {{ end }}
+    </div>
+{{ end }}

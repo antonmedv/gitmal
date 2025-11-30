@@ -1,0 +1,259 @@
+{{- /*gotype: github.com/antonmedv/gitmal/pkg/templates.CommitParams*/ -}}
+{{ define "head" }}
+    <style>
+      h1 code {
+        border-radius: var(--border-radius);
+        background: var(--c-bg-alt);
+        padding: 4px 8px;
+        font-family: var(--font-family-mono), monospace;
+        font-weight: 500;
+      }
+
+      .commit {
+        display: flex;
+        flex-direction: column;
+        gap: 16px;
+        margin-bottom: 16px;
+      }
+
+      .commit-info {
+        display: flex;
+        flex-direction: row;
+        gap: 8px;
+        align-items: flex-end;
+      }
+
+      .commit-author {
+        color: var(--c-text-1);
+        font-weight: 600;
+      }
+
+      .commit-date {
+        color: var(--c-text-2);
+        font-size: 12px;
+        font-family: var(--font-family-mono), monospace;
+      }
+
+      .commit-message {
+        border: 1px solid var(--c-border);
+        border-radius: var(--border-radius);
+        padding: 16px;
+      }
+
+      .commit-subject {
+        font-size: 16px;
+        font-weight: 600;
+      }
+
+      .commit-body {
+        margin-top: 16px;
+        white-space: pre-wrap;
+        line-height: 1.5;
+      }
+
+      .commit-subinfo {
+        display: flex;
+        flex-direction: row;
+        gap: 16px;
+        justify-content: space-between;
+      }
+
+      .commit-layout {
+        display: grid;
+        grid-template-columns: 1fr;
+        gap: 16px;
+      }
+
+      @media (min-width: 960px) {
+        .commit-layout {
+          grid-template-columns: 300px 1fr;
+          align-items: start;
+        }
+
+        .files-tree {
+          position: sticky;
+          top: 16px;
+        }
+
+        .files-tree-content {
+          max-height: calc(100vh - var(--header-height) - 40px);
+          overflow: auto;
+        }
+      }
+
+      .files-tree {
+        border: 1px solid var(--c-border);
+        border-radius: var(--border-radius);
+      }
+
+      .files-tree-header {
+        display: flex;
+        flex-direction: row;
+        align-items: center;
+        padding-inline: 16px;
+        height: var(--header-height);
+        border-bottom: 1px solid var(--c-border);
+        border-top-left-radius: var(--border-radius);
+        border-top-right-radius: var(--border-radius);
+        background: var(--c-bg-alt);
+        font-size: 14px;
+        font-weight: 600;
+      }
+
+      .files-tree-content {
+        display: block;
+        padding-block: 6px;
+      }
+
+      .tree .children {
+        margin-left: 16px;
+        border-left: 1px dashed var(--c-border);
+      }
+
+      .tree .node {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        padding: 10px 16px;
+      }
+
+      .tree .file-name {
+        flex: 1;
+        font-weight: 500;
+        color: var(--c-text-1);
+        cursor: pointer;
+      }
+
+      .tree .file-name:hover {
+        color: var(--c-brand-2);
+        text-decoration: underline;
+      }
+
+      .tree .dir {
+        color: var(--c-dir);
+      }
+
+      .tree .file-added {
+        color: var(--c-green);
+      }
+
+      .tree .file-deleted {
+        color: var(--c-red);
+      }
+
+      .tree .file-renamed {
+        color: var(--c-yellow);
+      }
+
+      /* Per-file sections */
+
+      .files {
+        min-width: 0;
+      }
+
+      .file-section + .file-section {
+        margin-top: 16px;
+      }
+
+      pre {
+        border: 1px solid var(--c-border);
+        border-top: none;
+        border-bottom-left-radius: var(--border-radius);
+        border-bottom-right-radius: var(--border-radius);
+      }
+
+      pre {
+        margin: 0;
+        padding: 8px 16px;
+        overflow-x: auto;
+        white-space: pre;
+        word-spacing: normal;
+        word-break: normal;
+        word-wrap: normal;
+        tab-size: 4;
+        font-family: var(--font-family-mono), monospace;
+      }
+
+      pre > code {
+        display: block;
+        padding: 0 16px;
+        width: fit-content;
+        min-width: 100%;
+        line-height: var(--code-line-height);
+        font-size: var(--code-font-size);
+      }
+
+      {{ .DiffCSS }}
+    </style>
+{{ end }}
+
+{{ define "body" }}
+    <h1>Commit <code>{{ .Commit.ShortHash }}</code></h1>
+
+    <div class="commit">
+        <div class="commit-info">
+            <div class="commit-author">{{ .Commit.Author }} &lt;{{ .Commit.Email }}&gt;</div>
+            <div class="commit-date">{{ .Commit.Date | FormatDate }}</div>
+        </div>
+        <div class="commit-message">
+            <div class="commit-subject">{{ .Commit.Subject }}</div>
+            {{ if .Commit.Body }}
+                <div class="commit-body">{{ .Commit.Body }}</div>{{ end }}
+        </div>
+        <div class="commit-subinfo">
+            {{ if .Commit.Parents }}
+                <div class="commit-parents">
+                    {{ if eq (len .Commit.Parents)  1 }}
+                        1 parent
+                    {{ else }}
+                        {{ .Commit.Parents | len }} parents
+                    {{ end }}
+                    {{ range $i, $p := .Commit.Parents }}
+                        {{ if gt $i 0 }}, {{ end }}
+                        <a href="{{ $p }}.html"><code>{{ $p | ShortHash }}</code></a>
+                    {{ end }}
+                </div>
+            {{ end }}
+        </div>
+    </div>
+
+    <div class="commit-layout">
+        <div class="files-tree">
+            <div class="files-tree-header">Changed files ({{ len .FileViews }})</div>
+            <div class="files-tree-content">
+                {{ if .FileTree }}
+                    <div class="tree">
+                        {{ template "file_tree" (FileTreeParams .FileTree) }}
+                    </div>
+                {{ else }}
+                    <div style="color: var(--c-text-3)">(no files)</div>
+                {{ end }}
+            </div>
+        </div>
+
+        <div class="files">
+            {{ range .FileViews }}
+                <section id="{{ .Path }}" class="file-section">
+                    <div class="header-container">
+                        <header class="file-header">
+                            {{ if .IsRename }}
+                                <div class="path">{{ .OldName }} → {{ .NewName }}</div>
+                            {{ else }}
+                                <div class="path">{{ .Path }}</div>
+                            {{ end }}
+                            <button class="goto-top" onclick="window.scrollTo({top: 0, behavior: 'smooth'})">
+                                <svg aria-hidden="true" focusable="false" width="16" height="16">
+                                    <use xlink:href="#arrow-top"></use>
+                                </svg>
+                                Top
+                            </button>
+                        </header>
+                    </div>
+                    <div class="file-diff">
+                        {{ .HTML }}
+                    </div>
+                </section>
+            {{ end }}
+        </div>
+    </div>
+{{ end }}

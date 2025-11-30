@@ -1,0 +1,43 @@
+{{- /*gotype:github.com/antonmedv/gitmal/pkg/templates.FileTreeParams*/ -}}
+{{ define "file_tree" }}
+    {{ range .Nodes }}
+        {{ if .IsDir }}
+            <details open>
+                <summary class="node">
+                    <svg aria-hidden="true" focusable="false" width="16" height="16" class="dir">
+                        <use xlink:href="#dir"></use>
+                    </svg>
+                    <span class="file-name">{{ .Name }}</span>
+                </summary>
+                <div class="children">
+                    {{ template "file_tree" (FileTreeParams .Children) }}
+                </div>
+            </details>
+        {{ else }}
+            <div class="node">
+                <div class="icon" aria-hidden="true">
+                    {{ if .IsNew }}
+                        <svg aria-hidden="true" focusable="false" width="16" height="16" class="file-added">
+                            <use xlink:href="#file-added"></use>
+                        </svg>
+                    {{ else if .IsDelete }}
+                        <svg aria-hidden="true" focusable="false" width="16" height="16" class="file-deleted">
+                            <use xlink:href="#file-deleted"></use>
+                        </svg>
+                    {{ else if .IsRename }}
+                        <svg aria-hidden="true" focusable="false" width="16" height="16" class="file-renamed">
+                            <use xlink:href="#file-renamed"></use>
+                        </svg>
+                    {{ else }}
+                        <svg aria-hidden="true" focusable="false" width="16" height="16">
+                            <use xlink:href="#file-modified"></use>
+                        </svg>
+                    {{ end }}
+                </div>
+                <a href="#{{.Path}}" class="file-name">
+                    {{ .Path | BaseName }}
+                </a>
+            </div>
+        {{ end }}
+    {{ end }}
+{{ end }}

@@ -1,0 +1,16 @@
+diff --git a/file.txt b/file.txt
+index c9e9e05..7d5fdc6 100644
+--- a/file.txt
++++ b/file.txt
+@@ -3,8 +3,10 @@ two
+ three
+ four
+ five
+-six
++six six six six six six
+ seven
+ eight
+ nine
+ ten
++eleven
++twelve

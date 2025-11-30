@@ -1,0 +1,10 @@
+diff --git a/script.sh b/script.sh
+old mode 100644
+new mode 100755
+index 7a870bd..68d501e
+--- a/script.sh
++++ b/script.sh
+@@ -1,2 +1,2 @@
+ #!/bin/bash
+-echo "Hello World"
++echo "Hello, World!"

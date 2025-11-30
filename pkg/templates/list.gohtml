@@ -1,0 +1,145 @@
+{{- /*gotype: github.com/antonmedv/gitmal/pkg/templates.ListParams*/ -}}
+{{ define "head" }}
+    <style>
+      .files {
+        border: 1px solid var(--c-border);
+        border-top: none;
+        width: 100%;
+        border-bottom-left-radius: var(--border-radius);
+        border-bottom-right-radius: var(--border-radius);
+        overflow-x: auto;
+      }
+
+      .files .dir {
+        color: var(--c-dir);
+      }
+
+      .files a {
+        color: var(--c-text-1);
+      }
+
+      .files a:hover {
+        color: var(--c-brand-2);
+      }
+
+      .row {
+        display: flex;
+        height: 40px;
+        border-bottom: 1px solid var(--c-border);
+        padding-inline: 16px;
+        gap: 16px;
+      }
+
+      .row:last-child {
+        border-bottom: none;
+      }
+
+      .row:hover {
+        background-color: var(--c-bg-alt);
+      }
+
+      .cell {
+        flex: 1;
+        display: flex;
+        gap: 8px;
+        align-items: center;
+        white-space: nowrap;
+      }
+
+      .cell:not(:first-child) {
+        justify-content: flex-end;
+        max-width: 100px;
+      }
+
+      @media (max-width: 767px) {
+        .file-mode {
+          display: none;
+        }
+      }
+
+      {{ if .Readme }}
+      .markdown-container {
+        padding-inline: 16px;
+        border: 1px solid var(--c-divider);
+        border-radius: 8px;
+        overflow-x: auto;
+        margin-top: 16px;
+      }
+
+      .markdown-body {
+        width: 100%;
+        min-width: 200px;
+        max-width: 980px;
+        margin: 0 auto;
+        padding: 32px;
+        word-wrap: break-word;
+        font-size: 16px;
+        line-height: 1.5;
+      }
+
+      @media (max-width: 767px) {
+        .markdown-body {
+          padding: 16px;
+        }
+      }
+
+      {{.CSSMarkdown}}
+      {{ end }}
+    </style>
+{{ end }}
+
+{{ define "body" }}
+    {{ template "header" . }}
+
+    <div class="files">
+        {{ if .ParentHref }}
+            <div class="row">
+                <div class="cell">
+                    <svg aria-hidden="true" focusable="false" width="16" height="16" class="dir">
+                        <use xlink:href="#dir"></use>
+                    </svg>
+                    <a href="{{ .ParentHref }}">..</a>
+                </div>
+            </div>
+        {{ end }}
+
+        {{ if or .Dirs .Files }}
+            {{ range .Dirs }}
+                <div class="row">
+                    <div class="cell">
+                        <svg aria-hidden="true" focusable="false" width="16" height="16" class="dir">
+                            <use xlink:href="#dir"></use>
+                        </svg>
+                        <a href="{{ .Href }}">{{ .Name }}</a>
+                    </div>
+                </div>
+            {{ end }}
+
+            {{ range .Files }}
+                <div class="row">
+                    <div class="cell">
+                        <svg aria-hidden="true" focusable="false" width="16" height="16">
+                            <use xlink:href="#file"></use>
+                        </svg>
+                        <a href="{{ .Href }}">{{ .Name }}</a>
+                    </div>
+                    <div class="cell file-mode">{{ .Mode }}</div>
+                    <div class="cell file-size">{{ .Size }}</div>
+                </div>
+            {{ end }}
+        {{ else }}
+            <div class="row">
+                <div class="cell">(empty)</div>
+            </div>
+        {{ end }}
+    </div>
+
+    {{ if .Readme }}
+        <div class="markdown-container">
+            <div class="markdown-body">
+                {{ .Readme }}
+            </div>
+        </div>
+    {{ end }}
+{{ end }}
+

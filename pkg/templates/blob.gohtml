@@ -1,0 +1,72 @@
+{{- /*gotype: github.com/antonmedv/gitmal/pkg/templates.BlobParams */ -}}
+{{ define "head" }}
+    <style>
+        {{ .CSS }}
+
+        [id] {
+          scroll-margin-top: var(--header-height);
+        }
+
+        pre {
+          border: 1px solid var(--c-border);
+          border-top: none;
+          border-bottom-left-radius: var(--border-radius);
+          border-bottom-right-radius: var(--border-radius);
+        }
+
+        pre {
+          margin: 0;
+          padding: 8px 16px;
+          overflow-x: auto;
+          white-space: pre;
+          word-spacing: normal;
+          word-break: normal;
+          word-wrap: normal;
+          tab-size: 4;
+          font-family: var(--font-family-mono), monospace;
+        }
+
+        pre > code {
+          display: block;
+          padding: 0 16px;
+          width: fit-content;
+          min-width: 100%;
+          line-height: var(--code-line-height);
+          font-size: var(--code-font-size);
+        }
+
+        .border {
+          border: 1px solid var(--c-border);
+          border-top: none;
+          border-bottom-left-radius: 6px;
+          border-bottom-right-radius: 6px;
+        }
+
+        .binary-file {
+          padding: 8px 16px;
+          font-style: italic;
+        }
+
+        .image {
+          padding: 8px 16px;
+          text-align: center;
+        }
+
+        .image img {
+          max-width: 100%;
+          height: auto;
+        }
+    </style>
+{{ end }}
+
+{{ define "body" }}
+    {{ template "header" . }}
+    {{ if .IsImage }}
+        <div class="image border">{{.Content}}</div>
+    {{ else if .IsBinary}}
+        <div class="binary-file border">Binary file</div>
+    {{ else }}
+        {{ .Content }}
+    {{ end }}
+{{ end }}
+

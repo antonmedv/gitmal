@@ -1,0 +1,18 @@
+diff --git a/file.txt b/numbers.txt
+similarity index 77%
+rename from file.txt
+rename to numbers.txt
+index c9e9e05..a6b31d6 100644
+--- a/file.txt
++++ b/numbers.txt
+@@ -3,8 +3,9 @@ two
+ three
+ four
+ five
+-six
++  six
+ seven
+ eight
+ nine
+ ten
++eleven

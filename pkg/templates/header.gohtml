@@ -1,0 +1,35 @@
+{{- /*gotype: github.com/antonmedv/gitmal/pkg/templates.HeaderParams*/ -}}
+{{ define "header" }}
+    <div class="header-container">
+        <header>
+            {{ if .Ref }}
+                <div class="header-ref" aria-label="Ref">{{ .Ref }}</div>
+            {{ end }}
+            {{ if .Header }}
+                <h1 class="title">{{ .Header }}</h1>
+            {{ else if .Breadcrumbs }}
+                <nav class="breadcrumbs" aria-label="Breadcrumbs">
+                    {{ range $i, $b := .Breadcrumbs }}
+                        {{ if gt $i 0 }}
+                            <div>/</div>
+                        {{ end }}
+                        {{ if $b.Href }}
+                            <a href="{{$b.Href}}">{{$b.Name}}</a>
+                        {{ else }}
+                            <h1>{{$b.Name}}</h1>
+                            {{ if $b.IsDir}}
+                                <div>/</div>
+                            {{ end}}
+                        {{ end }}
+                    {{ end }}
+                </nav>
+            {{ end }}
+            <button class="goto-top" onclick="window.scrollTo({top: 0, behavior: 'smooth'})">
+                <svg aria-hidden="true" focusable="false" width="16" height="16">
+                    <use xlink:href="#arrow-top"></use>
+                </svg>
+                Top
+            </button>
+        </header>
+    </div>
+{{ end }}

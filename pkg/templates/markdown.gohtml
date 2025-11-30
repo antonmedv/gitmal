@@ -1,0 +1,45 @@
+{{- /*gotype: github.com/antonmedv/gitmal/pkg/templates.MarkdownParams*/ -}}
+{{ define "head" }}
+    <style>
+      [id] {
+        scroll-margin-top: var(--header-height);
+      }
+
+      .markdown-container {
+        border: 1px solid var(--c-divider);
+        border-top: none;
+        border-bottom-left-radius: 8px;
+        border-bottom-right-radius: 8px;
+        overflow-x: auto;
+      }
+
+      .markdown-body {
+        width: 100%;
+        min-width: 200px;
+        max-width: 980px;
+        margin: 0 auto;
+        padding: 32px;
+        word-wrap: break-word;
+        font-size: 16px;
+        line-height: 1.5;
+      }
+
+      @media (max-width: 767px) {
+        .markdown-body {
+          padding: 16px;
+        }
+      }
+
+      {{.CSSMarkdown}}
+    </style>
+{{ end }}
+
+{{ define "body" }}
+    {{ template "header" . }}
+    <article class="markdown-container">
+        <div class="markdown-body">
+            {{ .Content }}
+        </div>
+    </article>
+{{ end }}
+

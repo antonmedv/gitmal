@@ -1,0 +1,177 @@
+{{- /*gotype: github.com/antonmedv/gitmal/pkg/templates.CommitsListParams*/ -}}
+{{ define "head" }}
+    <style>
+      .commits {
+        border: 1px solid var(--c-border);
+        border-top: none;
+        border-bottom-left-radius: var(--border-radius);
+        border-bottom-right-radius: var(--border-radius);
+        overflow-x: auto;
+      }
+
+      .row {
+        display: flex;
+        height: 40px;
+        border-bottom: 1px solid var(--c-border);
+        padding-inline: 16px;
+        gap: 16px;
+      }
+
+      .row:last-child {
+        border-bottom: none;
+      }
+
+      .row:hover {
+        background-color: var(--c-bg-alt);
+      }
+
+      .cell {
+        display: flex;
+        gap: 8px;
+        align-items: center;
+      }
+
+      .hash a {
+        font-family: var(--font-family-mono), monospace;
+        color: var(--c-text-2);
+      }
+
+      .commit-title {
+        flex: 1;
+      }
+
+      .commit-title a {
+        color: var(--c-text-1);
+        line-height: 1.5;
+      }
+
+      .commit-title a:hover {
+        color: var(--c-brand-2);
+      }
+
+      .date {
+        font-family: var(--font-family-mono), monospace;
+        font-size: 12px;
+        color: var(--c-text-2);
+      }
+
+      .pagination {
+        display: flex;
+        gap: 8px;
+        align-items: center;
+        justify-content: center;
+        margin-top: 12px;
+        padding: 8px 0;
+        color: var(--c-text-2);
+      }
+
+      .pagination a,
+      .pagination span.btn {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        padding: 6px 10px;
+        border: 1px solid var(--c-border);
+        border-radius: 6px;
+        background: var(--c-bg-elv);
+        color: var(--c-text-1);
+        text-decoration: none;
+        font-size: 13px;
+      }
+
+      .pagination a:hover {
+        color: var(--c-brand-2);
+        border-color: var(--c-brand-2);
+      }
+
+      .pagination .disabled {
+        opacity: 0.5;
+        pointer-events: none;
+      }
+
+      .pagination .page-indicator {
+        margin: 0 4px;
+        font-size: 13px;
+        color: var(--c-text-2);
+      }
+
+      /* Mobile optimizations */
+      @media (max-width: 767px) {
+        .row {
+          height: auto;
+          padding: 10px 12px;
+          gap: 12px;
+          flex-wrap: wrap;
+          align-items: flex-start;
+        }
+
+        .commit-title {
+          flex-basis: 100%;
+          order: 1;
+        }
+
+        .author, .date, .hash {
+          font-size: 12px;
+        }
+
+        .author {
+          color: var(--c-text-2);
+          order: 2;
+        }
+
+        .date {
+          order: 2;
+        }
+
+        .hash {
+          margin-left: auto;
+          order: 3;
+        }
+      }
+    </style>
+{{ end }}
+
+{{ define "body" }}
+    {{ template "header" . }}
+    <div class="commits">
+        {{ range .Commits }}
+            <div class="row">
+                <div class="cell hash">
+                    <a href="{{ .Href }}">{{ .ShortHash }}</a>
+                </div>
+                <div class="cell commit-title"><a href="{{ .Href }}">{{ .Subject }}</a></div>
+                <div class="cell author">{{ .Author }}</div>
+                <div class="cell date">{{ .Date | FormatDate }}</div>
+            </div>
+        {{ else}}
+            <div class="row">(no commits)</div>
+        {{ end }}
+    </div>
+    <div class="pagination">
+        {{ if .Page.FirstHref }}
+            <a class="btn" href="{{ .Page.FirstHref }}">« First</a>
+        {{ else }}
+            <span class="btn disabled">« First</span>
+        {{ end }}
+
+        {{ if .Page.PrevHref }}
+            <a class="btn" href="{{ .Page.PrevHref }}">← Newer</a>
+        {{ else }}
+            <span class="btn disabled">← Newer</span>
+        {{ end }}
+
+        <span class="page-indicator">Page {{ .Page.Page }} of {{ .Page.TotalPages }}</span>
+
+        {{ if .Page.NextHref }}
+            <a class="btn" href="{{ .Page.NextHref }}">Older →</a>
+        {{ else }}
+            <span class="btn disabled">Older →</span>
+        {{ end }}
+
+        {{ if .Page.LastHref }}
+            <a class="btn" href="{{ .Page.LastHref }}">Last »</a>
+        {{ else }}
+            <span class="btn disabled">Last »</span>
+        {{ end }}
+    </div>
+{{ end }}
