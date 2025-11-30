@@ -37,8 +37,8 @@ Here are a few repos hosted on my website:
 - google/zx at [git.medv.io/zx/](https://git.medv.io/zx/)
 - my-badges/my-badges at [git.medv.io/my-badges/](https://git.medv.io/my-badges/)
 
-I tried gitmal on kubernetes repository as well. Generation on my MacBook Air M2 takes around 16 minutes,
-and the result weights around 20 GB.
+Gitmal on kubernetes repository works as well. Generation on my MacBook Air M2 with `--minify` and `--gzip` flags
+takes around 25 minutes, and the generated files weigh around 2 GB.
 
 ## Themes
 
