@@ -54,6 +54,7 @@ func main() {
 
 	_, noFiles := os.LookupEnv("NO_FILES")
 	_, noCommitsList := os.LookupEnv("NO_COMMITS_LIST")
+	_, noOutputDirCheck := os.LookupEnv("NO_OUTPUT_DIR_CHECK")
 
 	flag.StringVar(&flagOwner, "owner", "", "Project owner")
 	flag.StringVar(&flagName, "name", "", "Project name")
@@ -74,6 +75,21 @@ func main() {
 	if flagPreviewThemes {
 		previewThemes()
 		os.Exit(0)
+	}
+
+	outputDir, err := filepath.Abs(flagOutput)
+	if err != nil {
+		panic(err)
+	}
+
+	if !noOutputDirCheck {
+		if fi, err := os.Stat(outputDir); err == nil && fi.IsDir() {
+			if entries, err := os.ReadDir(outputDir); err == nil && len(entries) > 0 {
+				echo(fmt.Sprintf("Output directory %q is not empty.", outputDir))
+				echo("Please remove its contents or choose a different --output directory.")
+				os.Exit(1)
+			}
+		}
 	}
 
 	absInput, err := filepath.Abs(input)
@@ -129,7 +145,7 @@ func main() {
 		Owner:      flagOwner,
 		Name:       flagName,
 		RepoDir:    input,
-		OutputDir:  flagOutput,
+		OutputDir:  outputDir,
 		Style:      flagTheme,
 		Dark:       themeColor == "dark",
 		DefaultRef: git.Ref(flagDefaultBranch),
