@@ -31,6 +31,15 @@ gitmal --help
 <p align="center"><img src="img/gitmal-screenshot-file-tree.webp" alt="Gitmal File Tree" width="600"></p>
 <p align="center"><img src="img/gitmal-screenshot-files.webp" alt="Gitmal Files Page" width="600"></p>
 
+## Examples
+
+Here are a few repos hosted on my website:
+- google/zx at [git.medv.io/zx/](https://git.medv.io/zx/)
+- my-badges/my-badges at [git.medv.io/my-badges/](https://git.medv.io/my-badges/)
+
+I tried gitmal on kubernetes repository as well. Generation on my MacBook Air M2 takes around 16 minutes,
+and the result weights around 20 GB.
+
 ## Themes
 
 Gitmal supports different code highlighting themes. You can customize the theme with `--theme` flag.
