@@ -224,21 +224,27 @@
         </div>
         <div class="commit-message">
             <div class="commit-subject">
-              {{ .Commit.Subject }}
-              {{ if .Commit.RefNames }}
-              <span class="ref-badges">
-                {{ range .Commit.RefNames }}
-                  {{ if or (eq .Kind "Branch") (eq .Kind "Tag") }}
-                    <span class="badge">{{ if eq .Kind "Tag" }}tag: {{ end }}{{ .Name }}</span>
-                  {{ end }}
+                {{ .Commit.Subject }}
+                {{ if .Commit.RefNames }}
+                    <span class="ref-badges">
+                        {{ range .Commit.RefNames }}
+                            {{ if or (eq .Kind "Branch") (eq .Kind "Tag") }}
+                                <span class="badge">{{ if eq .Kind "Tag" }}tag: {{ end }}{{ .Name }}</span>
+                            {{ end }}
+                        {{ end }}
+                    </span>
                 {{ end }}
-              </span>
-              {{ end }}
             </div>
             {{ if .Commit.Body }}
-                <div class="commit-body">{{ .Commit.Body }}</div>{{ end }}
+                <div class="commit-body">{{ .Commit.Body }}</div>
+            {{ end }}
         </div>
         <div class="commit-subinfo">
+            <div class="commit-branch">
+                {{ if .Commit.Branch }}
+                    <a href="../commits/{{ .Commit.Branch }}/index.html" class="badge">{{ .Commit.Branch }}</a>
+                {{ end }}
+            </div>
             {{ if .Commit.Parents }}
                 <div class="commit-parents">
                     {{ if eq (len .Commit.Parents)  1 }}

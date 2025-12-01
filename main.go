@@ -165,6 +165,10 @@ func main() {
 		}
 
 		for _, commit := range commitsFor[branch] {
+			if alreadyExisting, ok := commits[commit.Hash]; ok && alreadyExisting.Branch == params.DefaultRef {
+				continue
+			}
+			commit.Branch = branch
 			commits[commit.Hash] = commit
 		}
 	}
@@ -175,9 +179,14 @@ func main() {
 			panic(err)
 		}
 		for _, commit := range commitsForTag {
+			if alreadyExisting, ok := commits[commit.Hash]; ok && alreadyExisting.Branch != "" {
+				continue
+			}
 			commits[commit.Hash] = commit
 		}
 	}
+
+	echo(fmt.Sprintf("> %s: %d branches, %d tags, %d commits", params.Name, len(branches), len(tags), len(commits)))
 
 	if err := generateBranches(branches, flagDefaultBranch, params); err != nil {
 		panic(err)
@@ -218,7 +227,7 @@ func main() {
 		}
 	}
 
-	// Pack to the default branch
+	// Back to the default branch
 	params.Ref = git.Ref(flagDefaultBranch)
 
 	// Commits pages generation

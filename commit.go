@@ -229,13 +229,18 @@ func generateCommitPage(commit git.Commit, params Params) error {
 		return filesViews[i].Path < filesViews[j].Path
 	})
 
+	currentRef := params.DefaultRef
+	if commit.Branch != "" {
+		currentRef = commit.Branch
+	}
+
 	err = templates.CommitTemplate.ExecuteTemplate(f, "layout.gohtml", templates.CommitParams{
 		LayoutParams: templates.LayoutParams{
 			Title:      fmt.Sprintf("%s %s %s@%s", commit.Subject, dot, params.Name, commit.ShortHash),
 			Name:       params.Name,
 			Dark:       params.Dark,
 			RootHref:   rootHref,
-			CurrentRef: params.Ref,
+			CurrentRef: currentRef,
 			Selected:   "commits",
 		},
 		Commit:    commit,

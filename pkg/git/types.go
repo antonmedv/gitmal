@@ -23,6 +23,7 @@ type Commit struct {
 	Email     string
 	Date      time.Time
 	Parents   []string
+	Branch    Ref
 	RefNames  []RefName
 	Href      string
 }
