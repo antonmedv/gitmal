@@ -39,6 +39,7 @@ Here are a few repos hosted on my website:
 - [git.medv.io/zx/](https://git.medv.io/zx/) — github.com/google/zx
 - [git.medv.io/my-badges/](https://git.medv.io/my-badges/) — github.com/my-badges/my-badges
 - [git.medv.io/gitmal/](https://git.medv.io/gitmal/) — github.com/antonmedv/gitmal
+- [git.medv.io/zig/](https://git.medv.io/zig/) — codeberg.org/ziglang/zig (light theme)
 
 Gitmal on kubernetes repository works as well. Generation on my MacBook Air M2 with `--minify` and `--gzip` flags
 takes around 25 minutes, and the generated files weigh around 2 GB.
