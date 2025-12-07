@@ -20,7 +20,7 @@ func (r Ref) IsEmpty() bool {
 	return r.ref == ""
 }
 
-func (r Ref) Ref() string {
+func (r Ref) String() string {
 	return r.ref
 }
 

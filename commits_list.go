@@ -24,7 +24,7 @@ func generateLogForBranch(allCommits []git.Commit, params Params) error {
 		return err
 	}
 
-	p := progress_bar.NewProgressBar("commits for "+params.Ref.Ref(), totalPages)
+	p := progress_bar.NewProgressBar("commits for "+params.Ref.String(), totalPages)
 
 	page := 1
 	for pageCommits := range slices.Chunk(allCommits, commitsPerPage) {

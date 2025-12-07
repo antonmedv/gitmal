@@ -94,7 +94,7 @@ func Files(ref Ref, repoDir string) ([]Blob, error) {
 
 	// -r: recurse into subtrees
 	// -l: include blob size
-	cmd := exec.Command("git", "ls-tree", "--full-tree", "-r", "-l", ref.Ref())
+	cmd := exec.Command("git", "ls-tree", "--full-tree", "-r", "-l", ref.String())
 	if repoDir != "" {
 		cmd.Dir = repoDir
 	}
@@ -200,7 +200,7 @@ func BlobContent(ref Ref, path string, repoDir string) ([]byte, bool, error) {
 		ref = NewRef("HEAD")
 	}
 	// Use `git show ref:path` to get the blob content at that ref
-	cmd := exec.Command("git", "show", ref.Ref()+":"+path)
+	cmd := exec.Command("git", "show", ref.String()+":"+path)
 	if repoDir != "" {
 		cmd.Dir = repoDir
 	}
@@ -233,7 +233,7 @@ func Commits(ref Ref, repoDir string) ([]Commit, error) {
 		"--date=unix",
 		"--pretty=format:" + strings.Join(format, "\x1F"),
 		"-z", // Separate the commits with NULs instead of newlines
-		ref.Ref(),
+		ref.String(),
 	}
 
 	cmd := exec.Command("git", args...)

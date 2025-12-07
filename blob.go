@@ -57,7 +57,7 @@ func generateBlobs(files []git.Blob, params Params) error {
 	errCh := make(chan error, 1)
 	var wg sync.WaitGroup
 
-	p := progress_bar.NewProgressBar("blobs for "+params.Ref.Ref(), len(files))
+	p := progress_bar.NewProgressBar("blobs for "+params.Ref.String(), len(files))
 
 	workerFn := func() {
 		defer wg.Done()

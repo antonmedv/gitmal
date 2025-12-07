@@ -21,9 +21,9 @@ func generateBranches(branches []git.Ref, defaultBranch string, params Params) e
 	entries := make([]templates.BranchEntry, 0, len(branches))
 	for _, b := range branches {
 		entries = append(entries, templates.BranchEntry{
-			Name:        b.Ref(),
+			Name:        b.String(),
 			Href:        filepath.ToSlash(filepath.Join("blob", b.DirName()) + "/index.html"),
-			IsDefault:   b.Ref() == defaultBranch,
+			IsDefault:   b.String() == defaultBranch,
 			CommitsHref: filepath.ToSlash(filepath.Join("commits", b.DirName(), "index.html")),
 		})
 	}

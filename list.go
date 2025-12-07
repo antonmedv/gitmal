@@ -81,7 +81,7 @@ func generateLists(files []git.Blob, params Params) error {
 	errCh := make(chan error, 1)
 	var wg sync.WaitGroup
 
-	p := progress_bar.NewProgressBar("lists for "+params.Ref.Ref(), len(jobsSlice))
+	p := progress_bar.NewProgressBar("lists for "+params.Ref.String(), len(jobsSlice))
 
 	check := func(err error) bool {
 		if err != nil {

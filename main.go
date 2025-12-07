@@ -198,7 +198,7 @@ func main() {
 				panic(err)
 			}
 
-			if branch.Ref() == flagDefaultBranch {
+			if branch.String() == flagDefaultBranch {
 				defaultBranchFiles = files
 			}
 

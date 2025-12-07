@@ -107,7 +107,7 @@ func isImage(path string) bool {
 
 func containsBranch(branches []git.Ref, branch string) bool {
 	for _, b := range branches {
-		if b.Ref() == branch {
+		if b.String() == branch {
 			return true
 		}
 	}
