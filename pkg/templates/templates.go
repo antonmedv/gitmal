@@ -66,13 +66,13 @@ var previewContent string
 var PreviewTemplate = Must(New("preview").Parse(previewContent))
 
 type LayoutParams struct {
-	Title       string
-	Name        string
-	Dark        bool
-	CSSMarkdown CSS
-	RootHref    string
-	CurrentRef  git.Ref
-	Selected    string
+	Title         string
+	Name          string
+	Dark          bool
+	CSSMarkdown   CSS
+	RootHref      string
+	CurrentRefDir string
+	Selected      string
 }
 
 type HeaderParams struct {

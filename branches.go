@@ -48,12 +48,12 @@ func generateBranches(branches []git.Ref, defaultBranch string, params Params) e
 
 	err = templates.BranchesTemplate.ExecuteTemplate(f, "layout.gohtml", templates.BranchesParams{
 		LayoutParams: templates.LayoutParams{
-			Title:      fmt.Sprintf("Branches %s %s", dot, params.Name),
-			Name:       params.Name,
-			Dark:       params.Dark,
-			RootHref:   rootHref,
-			CurrentRef: params.DefaultRef,
-			Selected:   "branches",
+			Title:         fmt.Sprintf("Branches %s %s", dot, params.Name),
+			Name:          params.Name,
+			Dark:          params.Dark,
+			RootHref:      rootHref,
+			CurrentRefDir: params.DefaultRef.DirName(),
+			Selected:      "branches",
 		},
 		Branches: entries,
 	})

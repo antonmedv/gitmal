@@ -268,7 +268,7 @@
 <div class="menu">
     <a href="{{ .RootHref }}index.html" class="project-name">{{ .Name }}</a>
     <div class="menu-item {{ if eq .Selected "code" }}selected{{ end }}">
-        <a href="{{ .RootHref }}blob/{{ .CurrentRef }}/index.html">
+        <a href="{{ .RootHref }}blob/{{ .CurrentRefDir }}/index.html">
             <svg aria-hidden="true" width="16" height="16">
                 <use xlink:href="#code"></use>
             </svg>
@@ -292,7 +292,7 @@
         </a>
     </div>
     <div class="menu-item {{ if eq .Selected "commits" }}selected{{ end }}">
-        <a href="{{ .RootHref }}commits/{{ .CurrentRef }}/index.html">
+        <a href="{{ .RootHref }}commits/{{ .CurrentRefDir }}/index.html">
             <svg aria-hidden="true" focusable="false" width="16" height="16">
                 <use xlink:href="#commit"></use>
             </svg>

@@ -25,12 +25,12 @@ func generateTags(entries []git.Tag, params Params) error {
 
 	return templates.TagsTemplate.ExecuteTemplate(f, "layout.gohtml", templates.TagsParams{
 		LayoutParams: templates.LayoutParams{
-			Title:      fmt.Sprintf("Tags %s %s", dot, params.Name),
-			Name:       params.Name,
-			Dark:       params.Dark,
-			RootHref:   rootHref,
-			CurrentRef: params.DefaultRef,
-			Selected:   "tags",
+			Title:         fmt.Sprintf("Tags %s %s", dot, params.Name),
+			Name:          params.Name,
+			Dark:          params.Dark,
+			RootHref:      rootHref,
+			CurrentRefDir: params.DefaultRef.DirName(),
+			Selected:      "tags",
 		},
 		Tags: entries,
 	})

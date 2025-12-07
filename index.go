@@ -100,13 +100,13 @@ func generateIndex(files []git.Blob, params Params) error {
 
 	err = templates.ListTemplate.ExecuteTemplate(f, "layout.gohtml", templates.ListParams{
 		LayoutParams: templates.LayoutParams{
-			Title:       title,
-			Name:        params.Name,
-			Dark:        params.Dark,
-			CSSMarkdown: cssMarkdown(params.Dark),
-			RootHref:    rootHref,
-			CurrentRef:  params.Ref,
-			Selected:    "code",
+			Title:         title,
+			Name:          params.Name,
+			Dark:          params.Dark,
+			CSSMarkdown:   cssMarkdown(params.Dark),
+			RootHref:      rootHref,
+			CurrentRefDir: params.Ref.DirName(),
+			Selected:      "code",
 		},
 		HeaderParams: templates.HeaderParams{
 			Ref:         params.Ref,

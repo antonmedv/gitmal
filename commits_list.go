@@ -62,12 +62,12 @@ func generateLogForBranch(allCommits []git.Commit, params Params) error {
 
 		err = templates.CommitsListTemplate.ExecuteTemplate(f, "layout.gohtml", templates.CommitsListParams{
 			LayoutParams: templates.LayoutParams{
-				Title:      fmt.Sprintf("Commits %s %s", dot, params.Name),
-				Name:       params.Name,
-				Dark:       params.Dark,
-				RootHref:   rootHref,
-				CurrentRef: params.Ref,
-				Selected:   "commits",
+				Title:         fmt.Sprintf("Commits %s %s", dot, params.Name),
+				Name:          params.Name,
+				Dark:          params.Dark,
+				RootHref:      rootHref,
+				CurrentRefDir: params.Ref.DirName(),
+				Selected:      "commits",
 			},
 			HeaderParams: templates.HeaderParams{
 				Header: "Commits",

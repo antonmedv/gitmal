@@ -134,13 +134,13 @@ func generateBlobs(files []git.Blob, params Params) error {
 
 						err = templates.MarkdownTemplate.ExecuteTemplate(f, "layout.gohtml", templates.MarkdownParams{
 							LayoutParams: templates.LayoutParams{
-								Title:       fmt.Sprintf("%s/%s at %s", params.Name, blob.Path, params.Ref),
-								Dark:        params.Dark,
-								CSSMarkdown: cssMarkdown(params.Dark),
-								Name:        params.Name,
-								RootHref:    rootHref,
-								CurrentRef:  params.Ref,
-								Selected:    "code",
+								Title:         fmt.Sprintf("%s/%s at %s", params.Name, blob.Path, params.Ref),
+								Dark:          params.Dark,
+								CSSMarkdown:   cssMarkdown(params.Dark),
+								Name:          params.Name,
+								RootHref:      rootHref,
+								CurrentRefDir: params.Ref.DirName(),
+								Selected:      "code",
 							},
 							HeaderParams: templates.HeaderParams{
 								Ref:         params.Ref,
@@ -193,12 +193,12 @@ func generateBlobs(files []git.Blob, params Params) error {
 
 						err = templates.BlobTemplate.ExecuteTemplate(f, "layout.gohtml", templates.BlobParams{
 							LayoutParams: templates.LayoutParams{
-								Title:      fmt.Sprintf("%s/%s at %s", params.Name, blob.Path, params.Ref),
-								Dark:       params.Dark,
-								Name:       params.Name,
-								RootHref:   rootHref,
-								CurrentRef: params.Ref,
-								Selected:   "code",
+								Title:         fmt.Sprintf("%s/%s at %s", params.Name, blob.Path, params.Ref),
+								Dark:          params.Dark,
+								Name:          params.Name,
+								RootHref:      rootHref,
+								CurrentRefDir: params.Ref.DirName(),
+								Selected:      "code",
 							},
 							HeaderParams: templates.HeaderParams{
 								Ref:         params.Ref,
