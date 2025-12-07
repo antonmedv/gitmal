@@ -15,6 +15,8 @@ go install github.com/antonmedv/gitmal@latest
 docker run --rm -v $(pwd):/repo antonmedv/gitmal /repo
 ```
 
+Or download prebuilt binary from [releases](https://github.com/antonmedv/gitmal/releases).
+
 ## Usage
 
 Run gitmal in the repository dir. Gitmal will generate pages in _./output_ directory.
