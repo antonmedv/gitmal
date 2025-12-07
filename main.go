@@ -135,6 +135,11 @@ func main() {
 		os.Exit(1)
 	}
 
+	if yes, a, b := hasConflictingBranchNames(branches); yes {
+		echo(fmt.Sprintf("Conflicting branch names: %q and %q", a, b))
+		os.Exit(1)
+	}
+
 	// Start generating pages
 
 	params := Params{

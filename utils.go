@@ -113,3 +113,14 @@ func containsBranch(branches []git.Ref, branch string) bool {
 	}
 	return false
 }
+
+func hasConflictingBranchNames(branches []git.Ref) (bool, git.Ref, git.Ref) {
+	uniq := make(map[string]git.Ref, len(branches))
+	for _, b := range branches {
+		if a, exists := uniq[b.String()]; exists {
+			return true, a, b
+		}
+		uniq[b.String()] = b
+	}
+	return false, git.Ref{}, git.Ref{}
+}
