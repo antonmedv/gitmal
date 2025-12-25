@@ -21,12 +21,17 @@ jobs:
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
 
+      - name: Build test image
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          file: ./Dockerfile
+          load: true
+          tags: antonmedv/gitmal:test
+
       - name: Smoke test - verify binary runs
         run: |
-          echo "Testing --help flag..."
           docker run --rm antonmedv/gitmal:test --help
-          
-          echo "Smoke test passed!"
 
       - name: Build and push
         uses: docker/build-push-action@v5
