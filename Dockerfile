@@ -10,7 +10,10 @@ COPY . .
 
 RUN CGO_ENABLED=0 go build -o gitmal .
 
+
 FROM alpine
+
+RUN apk add --no-cache git
 
 COPY --from=builder /go/gitmal /bin/gitmal
 
