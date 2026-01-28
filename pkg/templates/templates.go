@@ -79,6 +79,7 @@ type HeaderParams struct {
 	Ref         git.Ref
 	Header      string
 	Breadcrumbs []Breadcrumb
+	RawHref     string
 }
 
 type Breadcrumb struct {
