@@ -98,6 +98,21 @@ func generateBlobs(files []git.Blob, params Params) error {
 						content = string(data)
 					}
 
+					// Write raw file for every blob
+					rawPath := filepath.Join(params.OutputDir, "raw", params.Ref.DirName(), blob.Path)
+					if err := os.MkdirAll(filepath.Dir(rawPath), 0o755); check(err) {
+						return
+					}
+					rf, err := os.Create(rawPath)
+					if check(err) {
+						return
+					}
+					if _, err := rf.Write(data); check(err) {
+						_ = rf.Close()
+						return
+					}
+					_ = rf.Close()
+
 					outPath := filepath.Join(params.OutputDir, "blob", params.Ref.DirName(), blob.Path) + ".html"
 					if err := os.MkdirAll(filepath.Dir(outPath), 0o755); check(err) {
 						return
@@ -116,6 +131,7 @@ func generateBlobs(files []git.Blob, params Params) error {
 						depth = len(strings.Split(blob.Path, "/")) - 1
 					}
 					rootHref := strings.Repeat("../", depth+2)
+					rawHref := filepath.Join(rootHref, "raw", params.Ref.DirName(), blob.Path)
 
 					if isMarkdown(blob.Path) {
 						var b bytes.Buffer
@@ -145,6 +161,7 @@ func generateBlobs(files []git.Blob, params Params) error {
 							HeaderParams: templates.HeaderParams{
 								Ref:         params.Ref,
 								Breadcrumbs: breadcrumbs(params.Name, blob.Path, true),
+								RawHref:     rawHref,
 							},
 							Blob:    blob,
 							Content: template.HTML(contentHTML),
@@ -170,23 +187,6 @@ func generateBlobs(files []git.Blob, params Params) error {
 
 						} else if isImg {
 
-							rawPath := filepath.Join(params.OutputDir, "raw", params.Ref.DirName(), blob.Path)
-							if err := os.MkdirAll(filepath.Dir(rawPath), 0o755); check(err) {
-								return
-							}
-
-							rf, err := os.Create(rawPath)
-							if check(err) {
-								return
-							}
-							defer func() {
-								_ = rf.Close()
-							}()
-
-							if _, err := rf.Write(data); check(err) {
-								return
-							}
-
 							relativeRawPath := filepath.Join(rootHref, "raw", params.Ref.DirName(), blob.Path)
 							contentHTML = template.HTML(fmt.Sprintf(`<img src="%s" alt="%s" />`, relativeRawPath, blob.FileName))
 						}
@@ -203,6 +203,7 @@ func generateBlobs(files []git.Blob, params Params) error {
 							HeaderParams: templates.HeaderParams{
 								Ref:         params.Ref,
 								Breadcrumbs: breadcrumbs(params.Name, blob.Path, true),
+								RawHref:     rawHref,
 							},
 							CSS:      template.CSS(css.String()),
 							Blob:     blob,

@@ -24,6 +24,23 @@
                     {{ end }}
                 </nav>
             {{ end }}
+            {{ if .RawHref }}
+                <div class="raw-actions">
+                    <a class="raw-btn" href="{{.RawHref}}">Raw</a>
+                    <button class="raw-btn has-tooltip" onclick="copyRaw(this, '{{.RawHref}}')">
+                        <svg aria-hidden="true" focusable="false" width="16" height="16">
+                            <use xlink:href="#copy"></use>
+                        </svg>
+                        <span class="tooltip">Copy raw content</span>
+                    </button>
+                    <a class="raw-btn has-tooltip" href="{{.RawHref}}" download>
+                        <svg aria-hidden="true" focusable="false" width="16" height="16">
+                            <use xlink:href="#download"></use>
+                        </svg>
+                        <span class="tooltip">Download raw file</span>
+                    </a>
+                </div>
+            {{ end }}
             <button class="goto-top" onclick="window.scrollTo({top: 0, behavior: 'smooth'})">
                 <svg aria-hidden="true" focusable="false" width="16" height="16">
                     <use xlink:href="#arrow-top"></use>
