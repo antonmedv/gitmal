@@ -270,6 +270,8 @@
 </head>
 <body>
 {{ template "svg" . }}
+
+{{ if .CurrentRefDir }}
 <div class="menu">
     <div class="menu-content">
         <a href="{{ .RootHref }}index.html" class="project-name">{{ .Name }}</a>
@@ -307,6 +309,7 @@
         </div>
     </div>
 </div>
+{{ end }}
 <main>
     <div class="main-content">
         {{ template "body" . }}

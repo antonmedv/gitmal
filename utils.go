@@ -5,6 +5,7 @@ import (
 	"os"
 	"path/filepath"
 	"strings"
+	"time"
 
 	"github.com/antonmedv/gitmal/pkg/git"
 	"github.com/antonmedv/gitmal/pkg/templates"
@@ -123,4 +124,53 @@ func hasConflictingBranchNames(branches []git.Ref) (bool, git.Ref, git.Ref) {
 		uniq[b.DirName()] = b
 	}
 	return false, git.Ref{}, git.Ref{}
+}
+
+
+func timeAgo(t time.Time) string {
+	if t.IsZero() {
+		return ""
+	}
+	d := time.Since(t)
+
+	switch {
+	case d < time.Minute:
+		return "just now"
+	case d < time.Hour:
+		n := int(d.Minutes())
+		if n == 1 {
+			return "1 min ago"
+		}
+		return fmt.Sprintf("%d mins ago", n)
+	case d < 24*time.Hour:
+		n := int(d.Hours())
+		if n == 1 {
+			return "1 hr ago"
+		}
+		return fmt.Sprintf("%d hrs ago", n)
+	case d < 30*24*time.Hour:
+		n := int(d.Hours() / 24)
+		if n == 1 {
+			return "1 day ago"
+		}
+		return fmt.Sprintf("%d days ago", n)
+	case d < 365*24*time.Hour:
+		n := int(d.Hours() / (24 * 30))
+		if n < 1 {
+			n = 1
+		}
+		if n == 1 {
+			return "1 month ago"
+		}
+		return fmt.Sprintf("%d months ago", n)
+	default:
+		n := int(d.Hours() / (24 * 365))
+		if n < 1 {
+			n = 1
+		}
+		if n == 1 {
+			return "1 year ago"
+		}
+		return fmt.Sprintf("%d years ago", n)
+	}
 }

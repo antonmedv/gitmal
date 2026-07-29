@@ -9,6 +9,7 @@ import (
 	"strings"
 
 	"github.com/antonmedv/gitmal/pkg/git"
+	"github.com/antonmedv/gitmal/pkg/templates"
 
 	flag "github.com/spf13/pflag"
 )
@@ -23,6 +24,7 @@ var (
 	flagPreviewThemes bool
 	flagMinify        bool
 	flagGzip          bool
+	flagMultipleRepo  bool
 )
 
 type Params struct {
@@ -34,6 +36,197 @@ type Params struct {
 	Style      string
 	Dark       bool
 	DefaultRef git.Ref
+}
+
+func processRepo(input string, outputRoot string, noFiles bool, noCommitsList bool) (templates.RepoSummary, error) {
+	outputDir, err := filepath.Abs(outputRoot)
+	if err != nil {
+		return templates.RepoSummary{}, err
+	}
+
+	absInput, err := filepath.Abs(input)
+	if err != nil {
+		return templates.RepoSummary{}, err
+	}
+	input = absInput
+
+	repoName := flagName
+	if repoName == "" {
+		repoName = strings.TrimSuffix(filepath.Base(input), ".git")
+	}
+
+	themeColor, ok := themeStyles[flagTheme]
+	if !ok {
+		return templates.RepoSummary{}, fmt.Errorf("invalid theme %q", flagTheme)
+	}
+
+	branchesFilter, err := regexp.Compile(flagBranches)
+	if err != nil {
+		return templates.RepoSummary{}, err
+	}
+
+	branches, err := git.Branches(input, branchesFilter, flagDefaultBranch)
+	if err != nil {
+		return templates.RepoSummary{}, err
+	}
+
+	tags, err := git.Tags(input)
+	if err != nil {
+		return templates.RepoSummary{}, err
+	}
+
+	defaultBranch := flagDefaultBranch
+	if defaultBranch == "" {
+		if containsBranch(branches, "master") {
+			defaultBranch = "master"
+		} else if containsBranch(branches, "main") {
+			defaultBranch = "main"
+		} else {
+			return templates.RepoSummary{}, fmt.Errorf("No default branch found. Specify one using --default-branch flag.")
+		}
+	}
+
+	if !containsBranch(branches, defaultBranch) {
+		return templates.RepoSummary{}, fmt.Errorf("Default branch %q not found", defaultBranch)
+	}
+
+	if yes, a, b := hasConflictingBranchNames(branches); yes {
+		return templates.RepoSummary{}, fmt.Errorf("Conflicting branchs %q and %q, both want to use %q dir name.", a, b, a.DirName())
+	}
+
+	// Start generating pages
+
+	params := Params{
+		Owner:      flagOwner,
+		Name:       repoName,
+		RepoDir:    input,
+		OutputDir:  filepath.Join(outputDir, repoName),
+		Style:      flagTheme,
+		Dark:       themeColor == "dark",
+		DefaultRef: git.NewRef(defaultBranch),
+	}
+
+	commits := make(map[string]git.Commit)
+	commitsFor := make(map[git.Ref][]git.Commit, len(branches))
+	commitsDetailsFor := make(map[git.Ref]templates.CommitDetails, len(branches))
+
+	for _, branch := range branches {
+		commitsFor[branch], err = git.Commits(branch, params.RepoDir)
+		if err != nil {
+			panic(err)
+		}
+
+		for _, commit := range commitsFor[branch] {
+			if alreadyExisting, ok := commits[commit.Hash]; ok && alreadyExisting.Branch == params.DefaultRef {
+				continue
+			}
+			commit.Branch = branch
+			commits[commit.Hash] = commit
+		}
+
+
+		branchCommits := commitsFor[branch]
+	  details := templates.CommitDetails{TotalCommits: len(branchCommits)}
+		if len(branchCommits) > 0 {
+			last := branchCommits[0]
+			details.LastCommit = last
+			details.LastCommitDate = timeAgo(last.Date)
+		}
+		commitsDetailsFor[branch] = details
+
+	}
+
+	// Add commits from tags
+	for _, tag := range tags {
+		commitsForTag, err := git.Commits(git.NewRef(tag.Name), params.RepoDir)
+		if err != nil {
+			panic(err)
+		}
+		for _, commit := range commitsForTag {
+			// Only add new commits
+			if alreadyExisting, ok := commits[commit.Hash]; ok && !alreadyExisting.Branch.IsEmpty() {
+				continue
+			}
+			commits[commit.Hash] = commit
+		}
+	}
+
+	echo(fmt.Sprintf("> %s: %d branches, %d tags, %d commits", params.Name, len(branches), len(tags), len(commits)))
+
+	if err := generateBranches(branches, defaultBranch, params); err != nil {
+		panic(err)
+	}
+
+	var defaultBranchFiles []git.Blob
+
+	for i, branch := range branches {
+		echo(fmt.Sprintf("> [%d/%d] %s@%s", i+1, len(branches), params.Name, branch))
+		params.Ref = branch
+
+		if !noFiles {
+			files, err := git.Files(params.Ref, params.RepoDir)
+			if err != nil {
+				panic(err)
+			}
+
+			if branch.String() == defaultBranch {
+				defaultBranchFiles = files
+			}
+
+			err = generateBlobs(files, params)
+			if err != nil {
+				panic(err)
+			}
+
+			err = generateLists(files, params)
+			if err != nil {
+				panic(err)
+			}
+		}
+
+		if !noCommitsList {
+			err = generateLogForBranch(commitsFor[branch], params)
+			if err != nil {
+				panic(err)
+			}
+		}
+	}
+
+	// Back to the default branch
+	params.Ref = git.NewRef(defaultBranch)
+
+	// Commits pages generation
+	echo("> generating commits...")
+	err = generateCommits(commits, params)
+	if err != nil {
+		panic(err)
+	}
+
+	// Tags page generation
+	if err := generateTags(tags, params); err != nil {
+		panic(err)
+	}
+
+	// Index page generation
+	if !noFiles {
+		if len(defaultBranchFiles) == 0 {
+			panic("No files found for default branch")
+		}
+		err = generateIndex(defaultBranchFiles, params)
+		if err != nil {
+			panic(err)
+		}
+	}
+
+	if flagMinify || flagGzip {
+		echo("> post-processing HTML...")
+		if err := postProcessHTML(params.OutputDir, flagMinify, flagGzip); err != nil {
+			panic(err)
+		}
+	}
+
+	defaultRef := git.NewRef(defaultBranch)
+	return buildRepoSummary(params, defaultBranch, len(branches), len(tags), commitsDetailsFor[defaultRef]), nil
 }
 
 func main() {
@@ -71,194 +264,69 @@ func main() {
 	flag.Usage = usage
 	flag.Parse()
 
-	input := "."
 	args := flag.Args()
-	if len(args) == 1 {
-		input = args[0]
+
+	if len(args) == 0 {
+		args = []string{"."}
 	}
-	if len(args) > 1 {
-		panic("Multiple repos not supported yet")
-	}
+
+	flagMultipleRepo = len(args) > 1
 
 	if flagPreviewThemes {
 		previewThemes()
 		os.Exit(0)
 	}
+	
+	skippedRepos := []string{}
+	processedRepos := []string{}
+	repoSummaries := []templates.RepoSummary{}
 
-	outputDir, err := filepath.Abs(flagOutput)
-	if err != nil {
-		panic(err)
+	themeColor, themeOK := themeStyles[flagTheme]
+	if !themeOK {
+		echo(fmt.Sprintf("invalid theme %q", flagTheme))
+		os.Exit(1)
+	}
+	themeDark := themeColor == "dark"
+
+	for _, repo := range args {
+		echo("Processing " + repo)
+
+		summary, err := processRepo(repo, flagOutput, noFiles, noCommitsList)
+		if err != nil {
+			echo(fmt.Sprintf("Error processing %s: %v", repo, err))
+			echo("Skipping " + repo)
+			echo("\n ===============================\n")
+			skippedRepos = append(skippedRepos, repo)
+			continue
+		}
+
+		echo("Done processing " + repo)
+		echo("\n ===============================\n")
+		processedRepos = append(processedRepos, repo)
+		repoSummaries = append(repoSummaries, summary)
 	}
 
-	absInput, err := filepath.Abs(input)
-	if err != nil {
-		panic(err)
-	}
-	input = absInput
-
-	if flagName == "" {
-		flagName = filepath.Base(input)
-		flagName = strings.TrimSuffix(flagName, ".git")
-	}
-
-	themeColor, ok := themeStyles[flagTheme]
-	if !ok {
-		panic("Invalid theme: " + flagTheme)
-	}
-
-	branchesFilter, err := regexp.Compile(flagBranches)
-	if err != nil {
-		panic(err)
-	}
-
-	branches, err := git.Branches(input, branchesFilter, flagDefaultBranch)
-	if err != nil {
-		panic(err)
-	}
-
-	tags, err := git.Tags(input)
-	if err != nil {
-		panic(err)
-	}
-
-	if flagDefaultBranch == "" {
-		if containsBranch(branches, "master") {
-			flagDefaultBranch = "master"
-		} else if containsBranch(branches, "main") {
-			flagDefaultBranch = "main"
-		} else {
-			echo("No default branch found. Specify one using --default-branch flag.")
+	if len(repoSummaries) >= 2 {
+		echo("> generating portal index...")
+		if err := generatePortalIndex(repoSummaries, flagOutput, flagOwner, themeDark); err != nil {
+			echo(fmt.Sprintf("Error generating portal index: %v", err))
 			os.Exit(1)
 		}
-	}
-
-	if !containsBranch(branches, flagDefaultBranch) {
-		echo(fmt.Sprintf("Default branch %q not found.", flagDefaultBranch))
-		echo("Specify a valid branch using --default-branch flag.")
-		os.Exit(1)
-	}
-
-	if yes, a, b := hasConflictingBranchNames(branches); yes {
-		echo(fmt.Sprintf("Conflicting branchs %q and %q, both want to use %q dir name.", a, b, a.DirName()))
-		os.Exit(1)
-	}
-
-	// Start generating pages
-
-	params := Params{
-		Owner:      flagOwner,
-		Name:       flagName,
-		RepoDir:    input,
-		OutputDir:  outputDir,
-		Style:      flagTheme,
-		Dark:       themeColor == "dark",
-		DefaultRef: git.NewRef(flagDefaultBranch),
-	}
-
-	commits := make(map[string]git.Commit)
-	commitsFor := make(map[git.Ref][]git.Commit, len(branches))
-
-	for _, branch := range branches {
-		commitsFor[branch], err = git.Commits(branch, params.RepoDir)
-		if err != nil {
-			panic(err)
-		}
-
-		for _, commit := range commitsFor[branch] {
-			if alreadyExisting, ok := commits[commit.Hash]; ok && alreadyExisting.Branch == params.DefaultRef {
-				continue
-			}
-			commit.Branch = branch
-			commits[commit.Hash] = commit
-		}
-	}
-
-	// Add commits from tags
-	for _, tag := range tags {
-		commitsForTag, err := git.Commits(git.NewRef(tag.Name), params.RepoDir)
-		if err != nil {
-			panic(err)
-		}
-		for _, commit := range commitsForTag {
-			// Only add new commits
-			if alreadyExisting, ok := commits[commit.Hash]; ok && !alreadyExisting.Branch.IsEmpty() {
-				continue
-			}
-			commits[commit.Hash] = commit
-		}
-	}
-
-	echo(fmt.Sprintf("> %s: %d branches, %d tags, %d commits", params.Name, len(branches), len(tags), len(commits)))
-
-	if err := generateBranches(branches, flagDefaultBranch, params); err != nil {
-		panic(err)
-	}
-
-	var defaultBranchFiles []git.Blob
-
-	for i, branch := range branches {
-		echo(fmt.Sprintf("> [%d/%d] %s@%s", i+1, len(branches), params.Name, branch))
-		params.Ref = branch
-
-		if !noFiles {
-			files, err := git.Files(params.Ref, params.RepoDir)
-			if err != nil {
-				panic(err)
-			}
-
-			if branch.String() == flagDefaultBranch {
-				defaultBranchFiles = files
-			}
-
-			err = generateBlobs(files, params)
-			if err != nil {
-				panic(err)
-			}
-
-			err = generateLists(files, params)
-			if err != nil {
-				panic(err)
-			}
-		}
-
-		if !noCommitsList {
-			err = generateLogForBranch(commitsFor[branch], params)
-			if err != nil {
-				panic(err)
+		if flagMinify || flagGzip {
+			portalIndex := filepath.Join(flagOutput, "index.html")
+			echo("> post-processing portal index...")
+			if err := postProcessHTMLFile(portalIndex, flagMinify, flagGzip); err != nil {
+				echo(fmt.Sprintf("Error post-processing portal index: %v", err))
+				os.Exit(1)
 			}
 		}
 	}
 
-	// Back to the default branch
-	params.Ref = git.NewRef(flagDefaultBranch)
-
-	// Commits pages generation
-	echo("> generating commits...")
-	err = generateCommits(commits, params)
-	if err != nil {
-		panic(err)
-	}
-
-	// Tags page generation
-	if err := generateTags(tags, params); err != nil {
-		panic(err)
-	}
-
-	// Index page generation
-	if !noFiles {
-		if len(defaultBranchFiles) == 0 {
-			panic("No files found for default branch")
-		}
-		err = generateIndex(defaultBranchFiles, params)
-		if err != nil {
-			panic(err)
-		}
-	}
-
-	if flagMinify || flagGzip {
-		echo("> post-processing HTML...")
-		if err := postProcessHTML(params.OutputDir, flagMinify, flagGzip); err != nil {
-			panic(err)
+	echo(fmt.Sprintf("Processed %d repos, skipped %d repos", len(processedRepos), len(skippedRepos)))
+	if len(skippedRepos) > 0 {
+		echo("Skipped repos:")
+		for _, repo := range skippedRepos {
+			echo(" - " + repo)
 		}
 	}
 }

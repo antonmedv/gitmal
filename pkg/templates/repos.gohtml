@@ -1,0 +1,141 @@
+{{- /*gotype: github.com/antonmedv/gitmal/pkg/templates.ReposParams*/ -}}
+{{ define "head" }}
+    <style>
+      .repo-count {
+        margin: 0 0 16px;
+        font-size: 14px;
+        color: var(--c-text-2);
+      }
+
+      .repos {
+        border: 1px solid var(--c-border);
+        border-radius: var(--border-radius);
+        overflow: hidden;
+        width: 100%;
+      }
+
+      .repo-row {
+        display: flex;
+        align-items: flex-start;
+        gap: 12px;
+        padding: 12px 16px;
+        border-bottom: 1px solid var(--c-border);
+        background-color: var(--c-bg-elv);
+        text-decoration: none;
+        color: inherit;
+        cursor: pointer;
+      }
+
+			.repo-row:hover{
+				text-decoration:none;
+			}
+
+      .repo-row:last-child {
+        border-bottom: none;
+      }
+
+      .repo-row:hover {
+        background-color: var(--c-bg-alt);
+      }
+
+      .repo-row:hover .repo-name {
+        color: var(--c-brand-2);
+      }
+
+      .repo-icon {
+        flex-shrink: 0;
+        margin-top: 2px;
+        color: var(--c-text-2);
+      }
+
+      .repo-main {
+        flex: 1;
+        min-width: 0;
+      }
+
+      .repo-name {
+        font-size: 16px;
+        font-weight: 600;
+        color: var(--c-text-1);
+      }
+
+      .repo-subject {
+        margin-top: 4px;
+        font-size: 13px;
+        color: var(--c-text-2);
+        line-height: 1.4;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+      }
+
+      .repo-meta {
+        flex-shrink: 0;
+        display: flex;
+        flex-wrap: wrap;
+        align-items: center;
+        justify-content: flex-end;
+        gap: 6px;
+        font-family: var(--font-family-mono), monospace;
+        font-size: 12px;
+        color: var(--c-text-2);
+        text-align: right;
+      }
+
+      .badge {
+        font-size: 12px;
+        color: var(--c-text-2);
+        border: 1px solid var(--c-border);
+        padding: 2px 6px;
+        border-radius: 999px;
+        font-family: var(--font-family), sans-serif;
+      }
+
+      .meta-sep {
+        color: var(--c-text-3);
+      }
+
+      @media (max-width: 640px) {
+        .repo-row {
+          flex-wrap: wrap;
+        }
+
+        .repo-meta {
+          width: 100%;
+          justify-content: flex-start;
+          text-align: left;
+        }
+      }
+    </style>
+{{ end }}
+
+{{ define "body" }}
+    <h1>{{ .Heading }}</h1>
+    <p class="repo-count">{{ .Total }} {{ if eq .Total 1 }}repository{{ else }}repositories{{ end }}</p>
+    <div class="repos">
+        {{ if .Repos }}
+            {{ range .Repos }}
+                <a  href="{{ .Href }}" class="repo-row">
+                    <svg aria-hidden="true" width="16" height="16" class="repo-icon">
+                        <use xlink:href="#repo"></use>
+                    </svg>
+                    <div class="repo-main">
+                        <span class="repo-name">{{ .DisplayName }}</span>
+                        {{ if .LastCommitSubject }}
+                            <div class="repo-subject">{{ .LastCommitSubject }}</div>
+                        {{ end }}
+                    </div>
+                    <div class="repo-meta">
+                        <span>{{ .TotalCommits }} commits</span>
+                        {{ if .LastCommitDate }}
+                            <span class="meta-sep">·</span>
+                            <span style="width:160px">updated {{ .LastCommitDate }}</span>
+                        {{ end }}
+                    </div>
+                </a>
+            {{ end }}
+        {{ else }}
+            <div class="repo-row">(no repositories)</div>
+        {{ end }}
+    </div>
+{{ end }}

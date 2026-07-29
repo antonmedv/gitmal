@@ -61,6 +61,10 @@ var CommitsListTemplate = Must(Must(layout.Clone()).Parse(commitsListContent))
 var commitContent string
 var CommitTemplate = Must(Must(layout.Clone()).Parse(commitContent))
 
+//go:embed repos.gohtml
+var reposContent string
+var ReposTemplate = Must(Must(layout.Clone()).Parse(reposContent))
+
 //go:embed preview.gohtml
 var previewContent string
 var PreviewTemplate = Must(New("preview").Parse(previewContent))
@@ -164,6 +168,12 @@ type CommitParams struct {
 	FileViews []FileView
 }
 
+type CommitDetails struct {
+	TotalCommits int
+	LastCommitDate string
+	LastCommit git.Commit 
+}
+
 type FileTreeParams struct {
 	Nodes []*FileTree
 }
@@ -199,6 +209,26 @@ type FileView struct {
 	IsBinary   bool
 	HasChanges bool
 	HTML       HTML // pre-rendered HTML for diff of this file
+}
+
+type RepoSummary struct {
+	Name              string
+	Owner             string
+	DisplayName       string
+	Href              string
+	DefaultBranch     string
+	TotalCommits      int
+	LastCommitDate    string
+	LastCommitSubject string
+	BranchCount       int
+	TagCount          int
+}
+
+type ReposParams struct {
+	LayoutParams
+	Heading string
+	Repos   []RepoSummary
+	Total   int
 }
 
 type PreviewCard struct {

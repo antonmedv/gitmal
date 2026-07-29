@@ -19,23 +19,34 @@ import (
 	"github.com/antonmedv/gitmal/pkg/progress_bar"
 )
 
+func postProcessHTMLFile(path string, doMinify bool, doGzip bool) error {
+	return postProcessHTMLFiles([]string{path}, doMinify, doGzip)
+}
+
 func postProcessHTML(root string, doMinify bool, doGzip bool) error {
 	// 1) Collect all HTML files first
 	var files []string
-	if err := filepath.WalkDir(root, func(path string, d fs.DirEntry, err error) error {
-		if err != nil {
+	if root != "" {
+		if err := filepath.WalkDir(root, func(path string, d fs.DirEntry, err error) error {
+			if err != nil {
+				return err
+			}
+			if d.IsDir() {
+				return nil
+			}
+			if strings.HasSuffix(d.Name(), ".html") {
+				files = append(files, path)
+			}
+			return nil
+		}); err != nil {
 			return err
 		}
-		if d.IsDir() {
-			return nil
-		}
-		if strings.HasSuffix(d.Name(), ".html") {
-			files = append(files, path)
-		}
-		return nil
-	}); err != nil {
-		return err
 	}
+
+	return postProcessHTMLFiles(files, doMinify, doGzip)
+}
+
+func postProcessHTMLFiles(files []string, doMinify bool, doGzip bool) error {
 
 	if len(files) == 0 {
 		return nil
